@@ -16,32 +16,17 @@ const PORT = 3000;
 //estamos dissendo que nosso servidor via utilizar e comnicar, nas requisiçoes e resposta, usandi json 
 app.use(express.json())
 
-// Roatas são metodos especiais que são chamadas para facer uma determoinadfa requisição. cada uma tem com metodo HTTP (GET POST PUT DELETE). O metodo, no express, e feito desta form:
-//o primero argumento é o primero caminho para cassar uma rota, ja no segundo é a função executrar quando hamamos a rotas
-//app.metodoHTTP('caminho' ,() => {})
-
-//Métodos GET -> buscar uma informação
-// rep é o objeto da requisição 
-//res é o objeto da resposta
-app.get ('/mensagem',(req , res) => {
-    res.status(200).send("Ola galera")
-})
-
-app.get ('/meunome',(req , res) => {
-    res.status(200).send("Meu nome é Jonh japezuelano")
-})
-
 
 //LISTA USUARIO
-app.get('/usuario', async (req, res) => {
+app.get('/livros', async (req, res) => {
     //tenta fazer a consulta no banco 
     try{
         //  
-        const [usuarios, dados] = await pool.query(
-            'SELECT * FROM usuarios'
+        const [livros, dados] = await pool.query(
+            'SELECT * FROM livros'
         )
         //retorna a resposta com status 200 (ok) e envia a lista de usuario em formato de JSON
-        return res.status(200).json(usuarios)
+        return res.status(200).json(livros)
 
     }catch (erro){ // se de errado cai aqui e mostra o erro
 
@@ -52,12 +37,12 @@ app.get('/usuario', async (req, res) => {
 
 
 //CRIA O NOVO USUARIO
-app.post('/usuarios', async (req, res) => {
+app.post('/livros', async (req, res) => {
     try{
-        const {nome, email, senha} = req.body
+        const {titulo, autor, categoria, ano_de_publicacao} = req.body
         //essa resposta envia no corpo do nossa requisição 
         const [resultado] = await pool.query(
-            "INSERT INTO usuarios (nome, email, senha) VALUES (?,?,?)", [nome, email, senha]
+            "INSERT INTO livros (titulo, autor, categoria, ano_de_publicacao) VALUES (?,?,?,?)", [titulo, autor, categoria, ano_de_publicacao]
         )
         return res.status(201).json(resultado)
     }catch (erro){
@@ -66,33 +51,33 @@ app.post('/usuarios', async (req, res) => {
 
 })
 
-app.put("/usuarios/:id", async (req, res) => {
+ app.put("/livros/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { nome, email, senha } = req.body;
+    const { titulo, autor, categoria, ano_de_publicacao } = req.body;
 
     const [resultado] = await pool.query(
-      "UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?",
-      [nome, email, senha, id]
+      "UPDATE livros SET titulo = ?, autor = ?, categoria = ?, ano_de_publicacao = ? WHERE id = ?",
+      [titulo, autor, categoria, ano_de_publicacao, id]
     );
 
-    return res.status(200).json("Usuário atualizado com sucesso!");
+    return res.status(200).json("Livro atualizado com sucesso!");
   } catch (erro) {
     return res.status(500).json("Erro interno do servidor: " + erro);
   }
 });
 
-app.delete("/usuarios/:id", async (req, res) => {
+app.delete("/livros/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
      const [resultado] = await pool.query(
-      "DELETE FROM usuarios WHERE id = ?",
+      "DELETE FROM livros WHERE id = ?",
         [id]
     );
 
-    return res.status(200).json("Usuário foi para o vinnagre");
+    return res.status(200).json("O livro foi usado como lenha");
   } catch (erro) {
     return res.status(500).json("Erro interno do servidor: " + erro);
   }
