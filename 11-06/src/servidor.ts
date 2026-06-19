@@ -86,6 +86,30 @@ app.delete("/livros/:id", async (req, res) => {
 //listem() é o metodo de express para colocar nosso servidor no ar.Ele precissa que passemos coisas como parametro :
 // O primero é a porta
 // A segunda é uma função  que vai ser executada quando o executor estiver no ar
+
+app.patch("/livros/:id", async (req, res) =>{
+  try{
+    const { id } = req.params;
+
+    const campos = req.body;
+
+      const keys =Object.keys(campos);
+      const velues = Object.values(campos);
+
+      if(keys.length === 0){
+        return res.status(400).json("Nenhum campos enviado para atualização.")
+      }
+
+      const setClause = keys.map((keys) => `${keys} = ?`).join(", ")
+
+      await pool.query(
+        
+      )
+  }
+})
+
+
+
 app.listen(PORT,() => {
     console.log("O servidor esta rodando....")
 })
