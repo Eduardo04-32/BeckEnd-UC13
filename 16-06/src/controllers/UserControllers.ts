@@ -97,7 +97,7 @@ export class UsuarioController {
                 usuario
             );
 
-        } catch {   
+        } catch {
 
             return res.status(500).json({
                 mensagem: "Erro interno"
@@ -148,18 +148,18 @@ export class UsuarioController {
 
             const id = Number(req.params.id);
 
-            if(!id){
+            if (!id) {
                 return res.status(400).json({
-                mensagem: "Informação inexistentes"
-            });
+                    mensagem: "Informação inexistentes"
+                });
             }
 
-            const resultado =  await this.service.delete(id);
+            const resultado = await this.service.delete(id);
 
-            if(!resultado){
+            if (!resultado) {
                 return res.status(404).json({
-                mensagem: "Usuario não encontrado"
-            });
+                    mensagem: "Usuario não encontrado"
+                });
             }
 
 
