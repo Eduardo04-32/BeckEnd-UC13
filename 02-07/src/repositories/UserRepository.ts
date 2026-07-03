@@ -1,21 +1,23 @@
 import { AppDataSource } from "../config/data-source";
 import { User } from "../models/User";
 
-
-const repo = AppDataSource.getRepository(User)
+const repo = AppDataSource.getRepository(User);
 
 export const UserRepository = {
-    async findAll(){
-        return repo.find({relations:['posts']})
-    },
+  async findAll() {
+    return repo.find({ relations: ["posts"] });
+  },
 
-    async findById(id:number){
-        return repo.findOne({where:{id}, relations:['posts']})
-    },
+  async findById(id: number) {
+    return repo.findOne({ where: { id }, relations: ["posts"] });
+  },
 
-    async create(data:User){
-        const user = repo.create(data)
-        return repo.save(user)
-    },
+  async create(data: { name: string; email: string; password: string }) {
+    const user = repo.create(data);
+    return repo.save(user);
+  },
 
-}
+  async delete(id:number){
+    return repo.delete(id)
+  }
+};
