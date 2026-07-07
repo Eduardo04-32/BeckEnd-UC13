@@ -11,11 +11,19 @@ export const PostRepository = {
 
     async findById(id: number){
         return repo.findOne({where: {id}, relations: ["user"] })
-    }
+    },
 
-    create(data: Partial<Post>){
-        return Repository.create(data)
-    }
+    create(data: {}){
+        return repo.create(data)
+    },
+
+    async save(post: Post) {
+        return repo.save(post);
+    },
+
+    async delete(id: number) {
+        return repo.delete(id);
+    },
 
 
 }
