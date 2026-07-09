@@ -195,6 +195,64 @@ import {UserService} from "../services/UserServices.ts"
 
 ```ts
 export class AuthController{
-  async login (req:Request, res: Response, next: NextFunction)
+  async login (req:Request, res: Response, next: NextFunction){
+    try{
+      // Presisamos extrair o emaile e a senha polo metodo requisição
+      const {email, password} = req.body // Lembrem sempre de ordem e com o msm nome
+
+      // chamamos o metodos de login  da camada serveces: 
+      const result = await UserServices.login({email, password})
+
+      return res.status(200).json(result)
+
+    } catch(error){
+        next(error)
+    }
+  }
 }
+```
+Passo 6 - Agora presisasmos criara a rota do Auth. Porem, ao contrario que fazemos antes, não vamso por as rotas em um unico arquivo, Vamos dividirlas entre: routas de Auth, rotas de user, rotas de post e ai um arquivo principal que reune totas elas, vamos la: 
+
+### 6.1 - Dentro da pasta `routes`, crie um arquivo chamado `auth.routes.ts`.
+
+Dentro dele, faça os imports:
+
+```ts
+import { Router } from "express";
+import { AuthController } from "../controllers/AuthController";
+```
+
+### 6.2 - Crie o objeto `router` e uma instância do `AuthController`.
+
+```ts
+const router = Router();
+const authController = new AuthController();
+```
+
+### 6.3 - Agora, vamos criar a rota de login.
+
+Essa rota receberá uma requisição do tipo **POST** para `/login`. Quando ela for chamada, executará o método `login()` do `AuthController`.
+
+```ts
+router.post("/login", authController.login.bind(authController));
+```
+
+### 6.4 - Por fim, exporte o `router` para que ele possa ser utilizado em outros arquivos.
+
+```ts
+export default router;
+```
+
+O arquivo `auth.routes.ts` ficará assim:
+
+```ts
+import { Router } from "express";
+import { AuthController } from "../controllers/AuthController";
+
+const router = Router();
+const authController = new AuthController();
+
+router.post("/login", authController.login);
+
+export default router;
 ```
