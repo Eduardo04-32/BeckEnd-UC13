@@ -12,6 +12,10 @@ export const UserRepository = {
     return repo.findOne({ where: { id }, relations: ["posts"] });
   },
 
+  async findByEmail(email:string){
+    return repo.findOne({where: {email}})
+  },
+
   async create(data: { name: string; email: string; password: string }) {
     const user = repo.create(data);
     return repo.save(user);

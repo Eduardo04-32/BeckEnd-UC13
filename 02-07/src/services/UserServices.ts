@@ -9,6 +9,7 @@ import { omitPassword } from "../util/omittPassword";
 // Isso é para permitir que, mais tarde, o controller identifica o tipo de erro de uma forma mais clara
 
 export class NotFoundError extends Error {}
+export class Unauthorized extends Error{} // errro lançado quando não esta autorizado a acessar atl rota
 
 export const UserService = {
   //como para listar não precisa validar nada, aqui so chamamos os metodos de respository msm, posi o controle naão pode se counicar diretamente com
@@ -23,6 +24,16 @@ export const UserService = {
       throw new NotFoundError("Usuario não encontrado!");
     }
     return user;
+  },
+
+  async logn (data:{èmail:string, email: string}){
+    const user = UserRepository.findByEmail(data.email)
+
+    if (!user){
+      throw new NotFoundError("未找到用戶")
+    }
+
+    const passwordIsValida = await bcrypt.compare(data.password, user.password)
   },
 
   async create(data: { name: string; email: string; password: string }) {
