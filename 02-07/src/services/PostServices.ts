@@ -1,3 +1,4 @@
+import { listenerCount } from "node:cluster";
 import { PostRepository } from "../repositories/PostRepository";
 import { UserRepository } from "../repositories/UserRepository";
 import { NotFoundError } from "./UserServices";
@@ -26,6 +27,10 @@ export const PostServices = {
 
     const post = PostRepository.create({ title: data.title, user });
     return PostRepository.save(post);
+  },
+
+  async listMyPost(userId: number){
+    return PostRepository.findByUserId(userId)
   },
 
   async update(id: number, data: { title?: string; userId?: number }) {

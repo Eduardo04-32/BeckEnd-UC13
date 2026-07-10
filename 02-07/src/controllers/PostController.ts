@@ -21,6 +21,21 @@ export class PostController {
         }
     }
 
+    async listMyPosts(req: Request, res: Response, next: NextFunction) {
+        try {
+            const loggedUser = (req as any).user
+            const myPosts = PostServices.listMyPost(loggedUser.id)
+
+            return res.status(200).json(myPosts)
+
+            
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
+
     async create(req: Request, res: Response, next: NextFunction) {
         try {
             const { title, userId } = req.body;
@@ -30,6 +45,8 @@ export class PostController {
             next(error);
         }
     }
+
+
 
     async update(req: Request, res: Response, next: NextFunction) {
         try {
