@@ -1,31 +1,12 @@
 import { Router } from "express";
-import { UserController } from "../controllers/UserController";
-import { validateUser } from "../middlewares/validateUser";
-import { PostController } from "../controllers/PostController";
 import authRoutes from "./auth.routes";
-
-/* export const routes = Router()
-
-const userController = new UserController()
-const postController = new PostController()
-
-routes.use("/auth", authRoutes);
+import userRoutes from "./user.routes";
+import postRoutes from "./post.routes";
 
 
-routes.get('/users', userController.list.bind(userController))
-routes.get('/users/:id',userController.getById.bind(userController))
-routes.post('/users', validateUser, userController.create.bind(userController))
-routes.put('/users/:id', validateUser, userController.update.bind(userController))
-routes.delete('/users/:id', userController.delete.bind(userController))
 
-routes.get('/posts', postController.list.bind(postController))
-routes.get('/posts/:id', postController.getById.bind(postController))
-routes.post('/posts',  postController.create.bind(postController))
-routes.put('/posts/:id', postController.update.bind(postController))
-routes.delete('/posts/:id', postController.delete.bind(postController))
- */
+export const routes = Router() // cria o objeto das rotas do express (necessário para criar as rotas)
 
-reutes.use("/Users", userRoutes)
-reutes.use("/Users", userRoutes)
-reutes.use("/Users", userRoutes)
-
+routes.use("/users", userRoutes)
+routes.use("/posts", postRoutes) 
+routes.use("/auth", authRoutes) // http://localhost:3000/auth/login

@@ -1,14 +1,19 @@
 import { Router } from "express";
-import { UserController } from "../controllers/UserController";
+import { UserController} from "../controllers/UserController";
 import { validateUser } from "../middlewares/validateUser";
 
-export const routes = Router()
-const userController = new UserController()
 
-routes.get('/users', userController.list.bind(userController))
-routes.get('/users/:id',userController.getById.bind(userController))
-routes.post('/users', validateUser, userController.create.bind(userController))
-routes.put('/users/:id', validateUser, userController.update.bind(userController))
-routes.delete('/users/:id', userController.delete.bind(userController))
+const router = Router() // objeto do Router do Express (ele nos permite acessar os métodos para criar as rotas)
+const userController = new UserController() // objeto da classe AuthController
 
- export default routes;
+
+router.get('/', userController.list.bind(userController))
+router.get('/:id', userController.getById.bind(userController))
+// chamamos o middleware validateUser aqui
+// ele roda antes de criarmos o usuário: se os dados estiverem inválidos ou faltando, a requisição já é interrompida aqui, sem nem chegar ao Controller, e vai embora pra casa mais cedo.
+router.post('/', validateUser ,userController.create.bind(userController))
+router.put('/:id', userController.update.bind(userController))
+router.delete('/:id', userController.delete.bind(userController))
+
+
+export default router

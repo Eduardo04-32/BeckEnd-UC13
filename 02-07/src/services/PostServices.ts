@@ -1,7 +1,11 @@
 import { listenerCount } from "node:cluster";
 import { PostRepository } from "../repositories/PostRepository";
 import { UserRepository } from "../repositories/UserRepository";
-import { NotFoundError } from "./UserServices";
+
+
+export class NotFoundError extends Error {}
+export class UnauthorizedError extends Error {}
+
 
 export const PostServices = {
   async listAll() {
@@ -16,24 +20,37 @@ export const PostServices = {
     }
 
     return post;
+
   },
 
-  async create(data: { title: string; userId: number }) {
-    const user = await UserRepository.findById(data.userId);
+  ///////////////////////////////////////////////
+
+
+  async create(data: { title: string},  looggedUserId: number ) {
+
+    if (!data.title) {
+      throw new NotFoundError("Titulo não encontrado.");
+    }
+
+    const user = await UserRepository.findById(looggedUserId);
 
     if (!user) {
       throw new NotFoundError("Usuário não encontrado.");
     }
-
-    const post = PostRepository.create({ title: data.title, user });
-    return PostRepository.save(post);
+    
+    return PostRepository.create({
+      title: data.title,
+      user
+    });
   },
 
+  /////////////
+  
   async listMyPost(userId: number){
     return PostRepository.findByUserId(userId)
   },
 
-  async update(id: number, data: { title?: string; userId?: number }) {
+  async update(id: number, data: { title?: string}, looggedUserId: number) {
     const post = await PostRepository.findById(id);
 
     if (!post) {
