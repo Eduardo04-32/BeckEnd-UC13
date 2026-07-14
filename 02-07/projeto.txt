@@ -1,0 +1,1292 @@
+===== CONTEÚDO DO PROJETO =====
+
+
+================================================================================
+ARQUIVO: .env
+================================================================================
+
+DB_HOST = localhost
+DB_PORT = 3306
+DB_USER = root 
+DB_PWD = root 
+DB_NAME = rede_social
+
+PORT = 3000
+
+JWT_SECRET=minhaChaveSecreta123
+JWT_EXPIRES_IN=86400
+
+
+================================================================================
+ARQUIVO: .gitignore
+================================================================================
+
+/node_modules
+.env
+
+
+================================================================================
+ARQUIVO: package.json
+================================================================================
+
+{
+  "name": "02-07",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev src/server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.5",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.30"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.1.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^6.0.3"
+  }
+}
+
+
+
+================================================================================
+ARQUIVO: script.js
+================================================================================
+
+const fs = require("fs");
+const path = require("path");
+
+const pastaProjeto = __dirname;
+const arquivoSaida = path.join(__dirname, "projeto.txt");
+
+const ignorarPastas = [
+  "node_modules",
+  ".git",
+  "dist",
+  "build",
+  ".vscode",
+  "coverage"
+];
+
+const ignorarArquivos = [
+  "package-lock.json",
+  "yarn.lock",
+  "projeto.txt"
+];
+
+fs.writeFileSync(
+  arquivoSaida,
+  "===== CONTEÚDO DO PROJETO =====\n\n",
+  "utf8"
+);
+
+function lerDiretorio(diretorio) {
+  const itens = fs.readdirSync(diretorio);
+
+  for (const item of itens) {
+    const caminhoCompleto = path.join(diretorio, item);
+    const stats = fs.statSync(caminhoCompleto);
+
+    if (stats.isDirectory()) {
+      if (!ignorarPastas.includes(item)) {
+        lerDiretorio(caminhoCompleto);
+      }
+    } else {
+      if (ignorarArquivos.includes(item)) continue;
+
+      try {
+        const conteudo = fs.readFileSync(caminhoCompleto, "utf8");
+
+        fs.appendFileSync(
+          arquivoSaida,
+          `\n${"=".repeat(80)}\n` +
+          `ARQUIVO: ${path.relative(pastaProjeto, caminhoCompleto)}\n` +
+          `${"=".repeat(80)}\n\n` +
+          conteudo +
+          "\n\n"
+        );
+
+        console.log(`✔ ${path.relative(pastaProjeto, caminhoCompleto)}`);
+      } catch {
+        console.log(`✖ Ignorado (arquivo binário): ${item}`);
+      }
+    }
+  }
+}
+
+lerDiretorio(pastaProjeto);
+
+console.log(`\nArquivo gerado em: ${arquivoSaida}`);
+
+
+================================================================================
+ARQUIVO: src\config\data-source.ts
+================================================================================
+
+import 'reflect-metadata'
+import { DataSource } from 'typeorm'
+import * as dotenv from "dotenv"
+import { User } from '../models/User'
+import { Post } from '../models/Post'
+
+
+
+dotenv.config()
+const {DB_HOST, DB_PORT, DB_USER, DB_PWD, DB_NAME} = process.env
+
+export const AppDataSource = new DataSource({
+    type:'mysql',
+    host:DB_HOST,
+    port:Number(DB_PORT),
+    username:DB_USER,
+    password:DB_PWD,
+    database:DB_NAME,
+    synchronize:true,
+    logging:true,
+    entities:[User, Post]
+})
+
+
+================================================================================
+ARQUIVO: src\controllers\AuthController.ts
+================================================================================
+
+import { NextFunction, Request, Response } from "express";
+import { UserService } from "../services/UserServices";
+
+
+export class AuthController {
+  async login(req: Request, res: Response, next: NextFunction) {
+    try {
+      // Pegamos o e-mail e a senha enviados pelo body da requisição.
+      const { email, password } = req.body;
+
+      // Chamamos o método de login da camada Service.
+      const result = await UserService.login({ email, password });
+
+      // Se tudo der certo, retornamos o resultado.
+      return res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+
+================================================================================
+ARQUIVO: src\controllers\PostController.ts
+================================================================================
+
+import { Request, Response, NextFunction } from "express";
+import { PostServices } from "../services/PostServices";
+
+export class PostController {
+  async list(req: Request, res: Response, next: NextFunction) {
+    try {
+      const posts = await PostServices.listAll();
+      return res.json(posts);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const post = await PostServices.getById(id);
+      return res.json(post);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async listMyPosts(req: Request, res: Response, next: NextFunction) {
+    try {
+      const loggedUser = (req as any).user;
+      const myPosts = PostServices.listMyPost(loggedUser.id);
+
+      return res.status(200).json(myPosts);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { title } = req.body;
+      const loggedUser = (req as any).user;
+
+      const post = await PostServices.create({ title }, loggedUser.id);
+      return res.status(201).json(post);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const { title } = req.body;
+      const loggedUser = (req as any).user;
+
+      const post = await PostServices.update(id, {title}, loggedUser.id);
+
+      return res.status(200).json(post);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      await PostServices.delete(id);
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+
+
+================================================================================
+ARQUIVO: src\controllers\UserController.ts
+================================================================================
+
+import { NextFunction, Request, Response } from "express";
+import { UserService } from "../services/UserServices";
+
+export class UserController {
+  async list(req: Request, res: Response, next: NextFunction) {
+    try {
+      const users = await UserService.listAll();
+      return res.json(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const user = await UserService.getById(id);
+      return res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { name, email, password } = req.body;
+      const user = UserService.create({ name, email, password });
+      return res.status(201).json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const { name, email, password } = req.body;
+      const user = await UserService.update(id, { name, email, password });
+      return res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = Number(req.params.id);
+      const user = await UserService.delete(id);
+
+      // 204 (No Content) é o status correto para "deu certo, mas não
+      // tenho nada para retornar no corpo da resposta".
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+
+
+================================================================================
+ARQUIVO: src\middlewares\authMiddleware.ts
+================================================================================
+
+import { Request, Response, NextFunction } from "express";
+import { verify } from "node:crypto";
+import { verifyToken } from "../util/JWT";
+
+export function authMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  // no objeto da requisição ele vai ate os heders e verifica se tem algo dentro de authorization
+  // se tiver armazena aqui dentro, se mão, estão é null
+  const authorization = req.headers.authorization;
+
+  if (!authorization) {
+    return res.status(401).json({
+      // 401 é Unathorized (não autorizado)
+      mensagem: "Sem autorização: token não fornecido",
+    });
+  }
+
+  //Se tiver o token, presisasmos extrair ele
+  // O Split() pega uma string e divide ela pelos caracteres que colarem nos parênteces
+
+  const token = authorization.split(" ")[1];
+  const bearer = authorization.split(" ")[0];
+
+  if (bearer !== "Bearer") {
+    return res.status(401).json({
+      // 401 é Unathorized (não autorizado)
+      mensagem: "Sem autorização: token mal formado",
+    });
+  }
+
+  const decoded = verifyToken(token);
+
+  if (!decoded) {
+    return res.status(401).json({
+      // 401 é Unathorized (não autorizado)
+      mensagem: "Token invalido",
+    });
+  }
+
+  // a requisição ainda não tem um user dentro dela
+  // requeste não tem um atributo user
+  // eu estou tenatando criar ele para aramazenar as informações de um usuarios dentro de requisição 
+  //mas o type não deixa 
+  //para bular isso, transformações temporariamente do req de tipo 'any' para aceitara qualquer coisa 
+  (req as any).user = decoded
+
+  next() 
+}
+
+
+
+================================================================================
+ARQUIVO: src\middlewares\erroHandLer.ts
+================================================================================
+
+import { NextFunction, Request, Response } from "express";
+
+export function errorHandler(error: any,  rep: Request, res: Response, next: NextFunction){
+
+    console.log("Erro cacturtado pela errorHandler: ", error )
+
+    if (error.code === 'ER_DUP_ENTRY'){
+        return res.status(409).json({
+            mensage: "Registro duplicado (email já existentes)"
+        })
+    }
+
+    return res.status(500).json({
+        mensage: "Erro interno do servidor. Traduzindo: DEU RUIM, GURIZADA!"
+    })
+}
+
+
+================================================================================
+ARQUIVO: src\middlewares\ValidatePost.ts
+================================================================================
+
+import { Request, Response, NextFunction } from 'express';
+
+export function validatePost(req: Request, res: Response, next: NextFunction) {
+    const { title, userId } = req.body;
+
+    if (!title || !userId) {
+        return res.status(400).json({
+            message: 'Os campos title e userId são obrigatórios.',
+        });
+    }
+
+    next();
+}
+
+
+================================================================================
+ARQUIVO: src\middlewares\validateUser.ts
+================================================================================
+
+//Ele valida se os campos estão tudo certinhos (email, name e password)
+
+import { NextFunction, Request, Response } from "express";
+
+export function validateUser(req:Request, res: Response, next: NextFunction){
+    // pega os dados que variam do corpor da requisição
+    const {name, email, password} = req.body
+
+    // vamos faer a validação agora
+    if(!name || !email || !password){
+        // status 400 é bad Request (requisição mal formada)
+        mensagem: ""
+    }
+
+    if(password.length < 6){
+        return res.status(400).json({
+            mensage: "A senha deve ter mais de 6 caracteres, não 5,99999999999 "
+        })
+    }
+
+    next();
+    
+}
+
+
+
+
+
+================================================================================
+ARQUIVO: src\models\Post.ts
+================================================================================
+
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "./User";
+
+@Entity("posts")
+export class Post {
+  @PrimaryGeneratedColumn()
+  id: number;
+  @Column({ type: "varchar", length: 100, nullable: false })
+  title: string;
+
+  @ManyToOne(() => User, (user) => user.posts)
+  user: User;
+}
+
+/*
+
+criar um novo projeto 
+istalar a as dependencias 
+configurar o tsConfig, etc 
+
+Crie as entidades User e Task 
+
+user deve ter
+-id 
+-name 
+-email
+-password
+
+task deve ter 
+-id 
+-title
+-descrition
+
+faça as relações
+o objetivos e craiar um beackned de um gerardor de tarefas, onde um usuario pode criar varias tarefas 
+
+*/
+
+
+================================================================================
+ARQUIVO: src\models\User.ts
+================================================================================
+
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Post } from "./Post";
+
+//sinalizar ao typeorm que essa classe vai ser mapeada em uma tabela, utilizamos um decorator pra isto
+
+@Entity("users")
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ length: 100, nullable: false })
+  name: string;
+
+  @Column({ length: 100, unique: true, nullable:false })
+  email: string;
+
+  @Column({ nullable:false,})
+  password: string;
+  
+  @OneToMany(()=>Post,post => post.user)
+  posts:Post[]
+  
+}
+
+
+================================================================================
+ARQUIVO: src\Passo-a-passo-jwt.md
+================================================================================
+
+# O que é o jwt, o que significa? Onde ele mora? Do que ele se alimenta
+
+JWT sigmifica Json Web Token, Ele é o codigo que salva no navegador que, entre outras coisas, guardas as informações do usuarios (exemplo: `{id: 1, email: "sig Moreno}`)
+
+Como ele se parece? ele se parece com isso aqui
+
+` eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJhbGljZUBtYWlsLmNvbSJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c`
+
+Para que ele serve? Ele serve para guardadr informações de qual usuario esta logado. Assim nos podemos fazer requisições (exeplo, criar um post) sem pedir para logue novamente toda vez . tambnem podem pedir que um usuario crie, atualize, delete post apena para si msm, apena suas informações e não a dos outros
+
+Por exeplos: Vamos pensta em uma rede social. imagina que tu assece ao intagram e cria um post, vc presisa primeiro ter conta e logar. Nos usamos jwt justamnente para fazer isso: logar otra coisa, vc so pode criar post para si msm, não ha como criar ou deletar, por exeplo o post dos outros usuarios. O JWT tambem garante isso, pois ele informa qual o id do usuario que esta logado
+
+O token ele é dividido em 3 parates, as mais importante são as duas ultimas: o Payload e o Signature
+
+O Payload é a parte do meio. é ali que fica armecenadado as informações com id e o email do usuario
+
+O Signature é a terceira parte: Ali fica armazenado o "segredo" que um codigo que cadsa sistema tem o seu. Ele garante a que aquele token pertence aquele sistema, se for modificado, por exemplo, ele é inavalidado. Isso evita que uma pessoa pegue qualquer token e tente usar nosso sistema
+
+Como usar no nosso projeto??
+
+- 1 Primero é presiso istalar as dependencias
+
+```bash
+npm install jsonwebtoken @types/jsonwebtoken
+```
+
+- 2 Para usarmos o JWT agoara vamos crair u, arquivo `jwt.ts` dentro da pasta `Utils`.
+
+Dentro deste arquivo, presisamnos então:
+
+- 2.1 Importa tudo que for necessario: O jwt é tambem o dotenv (pois teremos varaiaveis impostante la)
+
+```ts
+import jwt from 'jsonwebtoken'
+import * as dotenv 'dotenv'
+```
+
+- 2.2 Presisamos carregar as variaveis do .env para o objeto process.env (ele é quem nos forneces os valores depois)
+
+```ts
+dotenv.config(); // sem isso aqui não acessa as variavei do .env
+
+// pegamos as variaveis do .env
+// use sempre o mesmo nome e a mesma ordem que esta no .env
+
+const { DB_HOST, DB_PORT, DB_USER, DB_PWD, DB_NAME } = process.env;
+```
+
+- 2.3 No .env, presisamos ter as variaveis correspondentes
+
+```ts
+DB_HOST = localhost;
+DB_PORT = 3306;
+DB_USER = root;
+DB_PWD = root;
+DB_NAME = rede_social;
+
+PORT = 3000;
+// esta são as novas variaveuis do ambiente
+JWT_SECRET = minhaChaveSecreta123; // serve para converter depois da assinatura do token
+JWT_EXPIRES_IN = 86400; // indica por tempo do teken (um dia inteiro)
+```
+
+- 2.4 Voltado ao arquivo `jwt.ts` vamos criar uma interfase chamada Payload para representar o que nos esperamos do nosso token
+
+```ts
+interface Payload {
+  id: number;
+  email: string;
+}
+```
+
+- 2.5 Agora vamos criar uma função que gera um novo tokem. Geralmente chamamos o metodo de uma função login, ect.
+
+```ts
+// Nunca se esqueçan de 'export' ou não podemos usar esta função em outro arquivo
+// Nosso metodo recebe por parametros de um objeto que deve ter id e email(por causa do nosso interface)
+export function generateToken(payload: Payload) {
+  // O metodo sign() da biblioteca do jwt serve para criar o novo token
+  // para isso passamos para ele nasta orden
+  // 1 - o Payload com as informações do usuario
+  // 2 - o segredo que esta no JWT_SECRET
+  // 3 - um objeto (ou seja entre 'chaves':{}) que contem a opições 'expiresIn', como o valor de JWT_EXPIRES_IN=86400 no sig()
+ //Se no .env estiver algo como "JWT_EXPIRES_IN = 86400", no sign() você precisa chamá-lo dentro de Number() para convertê-lo de string para número.
+
+export function generateToken(payload: Payload) {
+  return jwt.sign(payload, JWT_SECRET!, {
+    expiresIn: Number(JWT_EXPIRES_IN),
+  });
+}
+
+// O argumento JWT_SECRET possui um "!" no final porque o TypeScript considera
+// que essa variável pode ser undefined. Ao colocar o ponto de exclamação,
+// é como se disséssemos: "tem sim, confia no pai".
+
+```
+
+- 2.6 Criamos a função que gera o token. agora vamos criar a função que ele analisa se ele é valido ou não
+
+```ts
+// O token vem no formato do string mesmo
+export function verifyToken(token: strting) {
+  // chamamos a função verify() da biblioteca do jwt para fazer a verificação
+  // O primeiro argumento é o proprio token
+  // o segundo é o JWT_SECRET
+  // se for valido, a função retorna as infos do usuario
+  return jwt.verify(token, JWT_SCRETE!);
+}catch{
+    // se não for retorna nulo
+    return null
+}
+
+```
+
+Extra: se quiser testar, no mesmo arquivo voce pode chamar os metodos, primeiro o generate e depois o verify():
+
+```ts
+//gere um token com as informações que quiser
+const token = genereteToken({ id: 1, email: "sla@senac" });
+// mostra o token no terminal
+console.log(token);
+
+// Depois confira se o token é valido (se for o token que acavamos de gerar, sempre vaiu ser valido)
+const tokenValido = verifyToken(token);
+console.log(tokenValido); // se mostra as infos do usuarios ele é valido, se mostra null não é
+```
+
+Depois, rode com o comando
+
+```bash
+npx ts-node-dev src/utils/JWT.ts
+```
+
+Passo 3 - se não tiver a função de crair por email no UserRepository, presisamos criala. Se ja tem podemos pular esta etapa, Va ate repositori e cria a segunate função
+
+```ts
+  async findByEmail(email:string){
+    //finOne() é uma função do TypeORM que retorna um unicio resultado (se usamos apenas find() ele restorna apenas uma Array)
+    return repo.findOne({where: {email}})
+  },
+```
+
+Passo 4 - Na camada service, vamos presisar adicionar mais algumas coisas
+
+- 4.1 Adicionara uma extensao de uma clase `Erro` que vamos dar nome de `UnauthorizedErro` (UnauthorizedErro = não autoriza) adiciona a segunte linha em `UserServece.ts`:
+  // TA FALTANDO COISASSSSSSSSSSSS
+
+```ts
+export class UnauthorizeErro extends Erro {}
+```
+
+- 4.2 Vamos adicionar os metodos do log dentro do `UserService.ts`
+
+```ts
+// recev=be o email e senha como parametro
+  async login(data:{email:string, password: string}){
+    // Verifivca se o emial existe
+    // Presisamos do await ja que o metodo é async (ele presisa de um tempo para buscar as informações no banco)
+      const user = UserRepository.findByEmail(data.email)
+
+    // TA FATALTONDO COISASSSSSSSSSSSSSSSSS
+
+
+    // Verifimos se a senha esta correta
+    // data.password pega a senha e envia como parametro
+
+      const IsValid = await bcrypt.compare(data.password, user.password)
+
+      //fazemos uma veificaçao caso o email não estaja certo
+      if (!user || !password) throw new NotFoundError("Informações Incorreto")
+
+      const token = jwt.generateToken({
+        user.id
+        user.email
+      })
+
+      console.log(token)
+
+      return{
+        user: omitPassword(user), // chamamos este metodo que craiamos anteriormente, a sneha do usuario não aparece na resposta do servidor (IMPORTANTE DE MAIS)
+        token
+      }
+    }
+```
+
+Passo 5 - Agora, depois de servece vamos para a camada `r` onde vamos craiara um araquivo `se` ele ficara resposanvvel pela çarte de loginho. Dentro dele, insira: 
+
+-5.1 os import 
+
+```ts
+import { NextFunction, Request, Response } from "express";
+import {UserService} from "../services/UserServices.ts"
+```
+- 5.2 Os metodos do loginho 
+
+```ts
+export class AuthController{
+  async login (req:Request, res: Response, next: NextFunction){
+    try{
+      // Presisamos extrair o emaile e a senha polo metodo requisição
+      const {email, password} = req.body // Lembrem sempre de ordem e com o msm nome
+
+      // chamamos o metodos de login  da camada serveces: 
+      const result = await UserServices.login({email, password})
+
+      return res.status(200).json(result)
+
+    } catch(error){
+        next(error)
+    }
+  }
+}
+```
+Passo 6 - Agora presisasmos criara a rota do Auth. Porem, ao contrario que fazemos antes, não vamso por as rotas em um unico arquivo, Vamos dividirlas entre: routas de Auth, rotas de user, rotas de post e ai um arquivo principal que reune totas elas, vamos la: 
+
+### 6.1 - Dentro da pasta `routes`, crie um arquivo chamado `auth.routes.ts`.
+
+Dentro dele, faça os imports:
+
+```ts
+import { Router } from "express";
+import { AuthController } from "../controllers/AuthController";
+```
+
+### 6.2 - Crie o objeto `router` e uma instância do `AuthController`.
+
+```ts
+const router = Router();
+const authController = new AuthController();
+```
+
+### 6.3 - Agora, vamos criar a rota de login.
+
+Essa rota receberá uma requisição do tipo **POST** para `/login`. Quando ela for chamada, executará o método `login()` do `AuthController`.
+
+```ts
+router.post("/login", authController.login.bind(authController));
+```
+
+### 6.4 - Por fim, exporte o `router` para que ele possa ser utilizado em outros arquivos.
+
+```ts
+export default router;
+```
+
+O arquivo `auth.routes.ts` ficará assim:
+
+```ts
+import { Router } from "express";
+import { AuthController } from "../controllers/AuthController";
+
+const router = Router();
+const authController = new AuthController();
+
+router.post("/login", authController.login);
+
+export default router;
+```
+ 
+
+
+
+================================================================================
+ARQUIVO: src\repositories\BeckEnd-UC13.code-workspace
+================================================================================
+
+{
+	"folders": [
+		{
+			"name": "BeckEnd-UC13",
+			"path": "../../.."
+		}
+	],
+	"settings": {}
+}
+
+
+================================================================================
+ARQUIVO: src\repositories\PostRepository.ts
+================================================================================
+
+import { Repository } from "typeorm";
+import { AppDataSource } from "../config/data-source";
+import { Post } from "../models/Post";
+import { User } from "../models/User";
+
+const repo = AppDataSource.getRepository(Post)
+
+export const PostRepository = {
+    // encontra todos os post para todos
+    async findAll(){
+        return repo.find({relations: ["user"]})
+    },
+
+    //encontra um post atraves de um id
+    async findById(id: number){
+        return repo.findOne({where: {id}, relations: ["user"] })
+    },
+
+    // este metodo encontra todos os post de um usuario especifo
+    async findByUserId(userId:number){
+        return  repo.find({where: {user: {id:userId}}, relations: ["user"]})
+    },
+
+    async create(data: {id?:number, title:string, user:User}){
+       // cria o usuário
+        const user = repo.create(data)
+        // salva ele no banco
+        return repo.save(user)
+    },
+
+    async save(post: Post) {
+        return repo.save(post);
+    },
+
+    async delete(id: number) {
+        return repo.delete(id);
+    },
+
+
+}
+
+
+================================================================================
+ARQUIVO: src\repositories\UserRepository.ts
+================================================================================
+
+import { AppDataSource } from "../config/data-source";
+import { User } from "../models/User";
+
+const repo = AppDataSource.getRepository(User);
+
+export const UserRepository = {
+  async findAll() {
+    return repo.find({ relations: ["posts"] });
+  },
+
+  async findById(id: number) {
+    return repo.findOne({ where: { id }, relations: ["posts"] });
+  },
+
+  async findByEmail(email:string){
+    return repo.findOne({where: {email}})
+  },
+
+  async create(data: { name: string; email: string; password: string }) {
+    const user = repo.create(data);
+    return repo.save(user);
+  },
+
+  async delete(id:number){
+    return repo.delete(id)
+  }
+};
+
+
+
+================================================================================
+ARQUIVO: src\routes\auth.routes.ts
+================================================================================
+
+import { Router } from "express";
+import { AuthController } from "../controllers/AuthController";
+
+
+const router = Router() // objeto do Router do Express (ele nos permite acessar os métodos para criar as rotas)
+const authController = new AuthController() // objeto da classe AuthController
+
+
+router.post("/login", authController.login.bind(authController))
+
+export default router
+
+
+
+================================================================================
+ARQUIVO: src\routes\index.ts
+================================================================================
+
+import { Router } from "express";
+import authRoutes from "./auth.routes";
+import userRoutes from "./user.routes";
+import postRoutes from "./post.routes";
+
+
+
+export const routes = Router() // cria o objeto das rotas do express (necessário para criar as rotas)
+
+routes.use("/users", userRoutes)
+routes.use("/posts", postRoutes) 
+routes.use("/auth", authRoutes) // http://localhost:3000/auth/login
+
+
+================================================================================
+ARQUIVO: src\routes\post.routes.ts
+================================================================================
+
+import { Router } from "express";
+import { PostController } from "../controllers/PostController";
+import { authMiddleware } from "../middlewares/authMiddleware";
+
+
+
+const router = Router() // objeto do Router do Express (ele nos permite acessar os métodos para criar as rotas)
+const postController = new PostController()
+
+
+router.get("/", postController.list.bind(postController));
+router.get('/myposts', authMiddleware, postController.listMyPosts.bind(postController))
+
+router.get("/:id", postController.getById.bind(postController));
+router.post("/", authMiddleware, postController.create.bind(postController));
+router.put("/:id", authMiddleware, postController.update.bind(postController));
+router.delete("/:id", postController.delete.bind(postController));
+
+export default router
+
+
+================================================================================
+ARQUIVO: src\routes\user.routes.ts
+================================================================================
+
+import { Router } from "express";
+import { UserController} from "../controllers/UserController";
+import { validateUser } from "../middlewares/validateUser";
+
+
+const router = Router() // objeto do Router do Express (ele nos permite acessar os métodos para criar as rotas)
+const userController = new UserController() // objeto da classe AuthController
+
+
+router.get('/', userController.list.bind(userController))
+router.get('/:id', userController.getById.bind(userController))
+// chamamos o middleware validateUser aqui
+// ele roda antes de criarmos o usuário: se os dados estiverem inválidos ou faltando, a requisição já é interrompida aqui, sem nem chegar ao Controller, e vai embora pra casa mais cedo.
+router.post('/', validateUser ,userController.create.bind(userController))
+router.put('/:id', userController.update.bind(userController))
+router.delete('/:id', userController.delete.bind(userController))
+
+
+export default router
+
+
+================================================================================
+ARQUIVO: src\server.ts
+================================================================================
+
+import express from "express";
+import * as dotenv from "dotenv";
+import { AppDataSource } from "./config/data-source";
+import { routes } from "./routes";
+import { errorHandler } from "./middlewares/erroHandLer";
+
+const app = express();
+dotenv.config;
+const PORT = process.env.PORT;
+
+app.use(express.json())
+app.use(routes)
+
+AppDataSource.initialize().then(() =>{
+    console.log ("Banco de dados conectado com sucesso")
+
+    app.use(errorHandler)
+    
+    app.listen(PORT, ()=>{
+        console.log ("Servidor backend no ar!")
+    })
+}).catch((error) => console.log('Erro ao conectar com o banco'+ error))
+
+
+================================================================================
+ARQUIVO: src\services\PostServices.ts
+================================================================================
+
+import { listenerCount } from "node:cluster";
+import { PostRepository } from "../repositories/PostRepository";
+import { UserRepository } from "../repositories/UserRepository";
+import { LoggerFactory } from "typeorm/logger/LoggerFactory.js";
+
+
+export class NotFoundError extends Error {}
+export class ForbiddenError extends Error {}
+
+
+export const PostServices = {
+  async listAll() {
+    return PostRepository.findAll();
+  },
+
+  async getById(id: number) {
+    const post = await PostRepository.findById(id);
+
+    if (!post) {
+      throw new NotFoundError("Post não encontrado.");
+    }
+
+    return post;
+
+  },
+
+  ///////////////////////////////////////////////
+
+
+  async create(data: { title: string},  looggedUserId: number ) {
+
+    if (!data.title) {
+      throw new Error("Titulo é obrigatorio.");
+    }
+
+    const user = await UserRepository.findById(looggedUserId);
+
+    if (!user) {
+      throw new NotFoundError("Usuário não encontrado.");
+    }
+    
+    return PostRepository.create({
+      title: data.title,
+      user
+    });
+  },
+
+  /////////////
+
+  async listMyPost(userId: number){
+    return await PostRepository.findByUserId(userId)
+  },
+
+  async update(id: number, data: { title?: string}, looggedUser: number) {
+    const post = await PostRepository.findById(id);
+
+    if (!post) {
+      throw new NotFoundError("Post não encontrado.");
+    }
+
+    if (data.title) post.title = data.title;
+
+    // so o dono do postes pode edutare o post 
+    if (post.user.id !== looggedUser){
+       throw new ForbiddenError("Você não tem permissão para editar este post")
+    }
+
+    if(data.title) post.title = data.title;
+
+
+    return PostRepository.create(post);
+  },
+  
+
+  async delete(id: number) {
+    const result = await PostRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundError("Post não encontrado.");
+    }
+  },
+};
+
+
+
+================================================================================
+ARQUIVO: src\services\UserServices.ts
+================================================================================
+
+import { UserRepository } from "../repositories/UserRepository";
+import bcrypt from "bcrypt";
+import { omitPassword } from "../util/omittPassword";
+import { generateToken } from "../util/JWT";
+
+// A camadsa Servises é responsabevel por chamara os meotdod de Repositoryu e cuaidar
+//validações das nossas regras de negocios (ex: um usuario presisas ter )
+
+// Aqui estamos criando uma classe de erro que extenda uma classe de erro
+// Isso é para permitir que, mais tarde, o controller identifica o tipo de erro de uma forma mais clara
+
+export class NotFoundError extends Error {}
+ // errro lançado quando não esta autorizado a acessar atl rota
+export class UnauthorizedError extends Error {}
+
+export const UserService = {
+  //como para listar não precisa validar nada, aqui so chamamos os metodos de respository msm, posi o controle naão pode se counicar diretamente com
+  async listAll() {
+    return UserRepository.findAll();
+  },
+
+  async getById(id: number) {
+    const user = await UserRepository.findById(id);
+
+    if (!user) {
+      throw new NotFoundError("Usuario não encontrado!");
+    }
+    return user;
+  },
+
+  ////////
+  async login(data: { email: string; password: string }) {
+    const user = await UserRepository.findByEmail(data.email);
+
+    const passwordIsValida = await bcrypt.compare(
+      data.password,
+      user!.password
+    );
+
+    if (!user || !passwordIsValida)
+      throw new NotFoundError("Informação errada");
+
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+    });
+    console.log(token);
+    return {
+      user: omitPassword(user),
+      token,
+    };
+  },
+
+  ///////////////////
+
+  async create(data: { name: string; email: string; password: string }) {
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const user = await UserRepository.create({
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+    });
+
+    return omitPassword(user);
+  },
+
+  async update(
+    id: number,
+    data: { name: string; email: string; password: string },
+  ) {
+    // Vai encontrar o usuario pela id
+    const user = await UserRepository.findById(id);
+
+    if (!user) {
+      throw new NotFoundError("Usuario não encontrado!");
+    }
+
+    //
+    if (data.name) user.name = data.name;
+    if (data.email) user.email = data.email;
+
+    if (data.password) user.password = await bcrypt.hash(data.password, 10);
+
+    //depois de tudo isso acima, chamamos o medtodos create do respository (ele salva o banco)
+    const updatedUser = await UserRepository.create(user);
+
+    //Retorna  o usuario sem a senha (por causa do imitPassword) para que não mostre a asenha na resposta do servidor
+    return omitPassword(updatedUser);
+  },
+
+  async delete(id: number) {
+    const result = await UserRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundError("Post não encontrado.");
+    }
+  },
+};
+
+
+
+================================================================================
+ARQUIVO: src\util\JWT.ts
+================================================================================
+
+// este arqui sera resposanvel pelo metodos que gerar e tambem verificar um token
+
+import jwt from 'jsonwebtoken'
+import * as dotenv from 'dotenv'
+
+interface Payload {
+    id: number
+    email: string
+}
+
+dotenv.config()
+
+const {JWT_SECRET, JWT_EXPIRES_IN} = process.env
+
+// Metodod chamado quando presisan  gerra um token
+export function generateToken(Payload: Payload){
+    /*
+    o metodo sigt() da biblioteca dop JWT gera um token 
+    Presisasmos pasasar como argunto:
+    1° argumento: as informações do usuarios 
+    2° argumento: o 'segredo' que esta em JWT_SECRET  no .env
+    3° argumento: o objeto que contem a opção 'expiresin' cujo valor sera variavel JWT_EXPIRES_IN . env
+    */
+    return jwt.sign(Payload, JWT_SECRET!,{
+        expiresIn: Number(JWT_EXPIRES_IN)
+    })
+
+}
+
+export function verifyToken(token:string){
+    try{
+        /*
+        Para saber se ele é valido chamamos a função 'verify
+        */
+       return jwt.verify(token, JWT_SECRET!)
+    }catch{
+        return null
+    }
+}
+
+
+================================================================================
+ARQUIVO: src\util\omittPassword.ts
+================================================================================
+
+import {User} from "../models/User"
+
+export function omitPassword(user:User){
+    const { password , ...rest} = user 
+    return rest 
+}
+
+
+================================================================================
+ARQUIVO: src\util\qualquer.ts
+================================================================================
+
+import { generateToken } from "./JWT"
+
+/* const token = generateToken({id: 1, email:"sla@senac" })
+console.log(token) */
+
+
+
+
+================================================================================
+ARQUIVO: tsconfig.json
+================================================================================
+
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "module": "nodenext",
+    "target": "esnext",
+    "strict": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "strictPropertyInitialization": false
+  },
+  "include": ["src"],
+  "exclude": ["node_modules","dist"]
+}
+

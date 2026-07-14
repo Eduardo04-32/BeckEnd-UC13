@@ -24,7 +24,7 @@ export class PostController {
   async listMyPosts(req: Request, res: Response, next: NextFunction) {
     try {
       const loggedUser = (req as any).user;
-      const myPosts = PostServices.listMyPost(loggedUser.id);
+      const myPosts = await PostServices.listMyPost(loggedUser.id);
 
       return res.status(200).json(myPosts);
     } catch (error) {
@@ -47,9 +47,12 @@ export class PostController {
   async update(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
-      const { title, userId } = req.body;
-      const post = await PostServices.update(id, { title, userId });
-      return res.json(post);
+      const { title } = req.body;
+      const loggedUser = (req as any).user;
+
+      const post = await PostServices.update(id, {title}, loggedUser.id);
+
+      return res.status(200).json(post);
     } catch (error) {
       next(error);
     }
@@ -59,6 +62,7 @@ export class PostController {
     try {
       const id = Number(req.params.id);
       await PostServices.delete(id);
+      const loggedUser = (req as any).user;
       return res.status(204).send();
     } catch (error) {
       next(error);

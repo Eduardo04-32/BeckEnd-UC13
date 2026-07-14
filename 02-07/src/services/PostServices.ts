@@ -1,10 +1,11 @@
 import { listenerCount } from "node:cluster";
 import { PostRepository } from "../repositories/PostRepository";
 import { UserRepository } from "../repositories/UserRepository";
+import { LoggerFactory } from "typeorm/logger/LoggerFactory.js";
 
 
 export class NotFoundError extends Error {}
-export class UnauthorizedError extends Error {}
+export class ForbiddenError extends Error {}
 
 
 export const PostServices = {
@@ -29,7 +30,7 @@ export const PostServices = {
   async create(data: { title: string},  looggedUserId: number ) {
 
     if (!data.title) {
-      throw new NotFoundError("Titulo não encontrado.");
+      throw new Error("Titulo é obrigatorio.");
     }
 
     const user = await UserRepository.findById(looggedUserId);
@@ -45,12 +46,12 @@ export const PostServices = {
   },
 
   /////////////
-  
+
   async listMyPost(userId: number){
-    return PostRepository.findByUserId(userId)
+    return await PostRepository.findByUserId(userId)
   },
 
-  async update(id: number, data: { title?: string}, looggedUserId: number) {
+  async update(id: number, data: { title?: string}, looggedUser: number) {
     const post = await PostRepository.findById(id);
 
     if (!post) {
@@ -59,23 +60,31 @@ export const PostServices = {
 
     if (data.title) post.title = data.title;
 
-    if (data.userId) {
-      const user = await UserRepository.findById(data.userId);
-      if (!user) {
-        throw new NotFoundError("Usuário não encontrado.");
-      }
-      post.user = user;
+    // so o dono do postes pode edutare o post 
+    if (post.user.id !== looggedUser){
+       throw new ForbiddenError("Você não tem permissão para editar este post")
     }
 
-    return PostRepository.save(post);
+    if(data.title) post.title = data.title;
+
+
+    return PostRepository.create(post);
   },
   
 
-  async delete(id: number) {
+  async delete(id: number, looggedUserId: number) {
     const result = await PostRepository.delete(id);
 
     if (result.affected === 0) {
       throw new NotFoundError("Post não encontrado.");
     }
+
+    if (result !== looggedUserId){
+       throw new ForbiddenError("Você não tem permissão para eliminar este post")
+    }
+
+    return 
+
+
   },
 };

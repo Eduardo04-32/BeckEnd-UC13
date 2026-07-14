@@ -22,9 +22,9 @@ export function authMiddleware(
   // O Split() pega uma string e divide ela pelos caracteres que colarem nos parênteces
 
   const token = authorization.split(" ")[1];
-  const beare = authorization.split(" ")[0];
+  const bearer = authorization.split(" ")[0];
 
-  if (beare !== "Beare") {
+  if (bearer !== "Bearer") {
     return res.status(401).json({
       // 401 é Unathorized (não autorizado)
       mensagem: "Sem autorização: token mal formado",

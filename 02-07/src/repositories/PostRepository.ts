@@ -1,6 +1,7 @@
 import { Repository } from "typeorm";
 import { AppDataSource } from "../config/data-source";
 import { Post } from "../models/Post";
+import { User } from "../models/User";
 
 const repo = AppDataSource.getRepository(Post)
 
@@ -20,8 +21,11 @@ export const PostRepository = {
         return  repo.find({where: {user: {id:userId}}, relations: ["user"]})
     },
 
-    create(data: {}){
-        return repo.create(data)
+    async create(data: {id?:number, title:string, user:User}){
+       // cria o usuário
+        const user = repo.create(data)
+        // salva ele no banco
+        return repo.save(user)
     },
 
     async save(post: Post) {
