@@ -79,7 +79,7 @@ export const PostServices = {
       throw new NotFoundError("Post não encontrado.");
     }
 
-    if (result !== looggedUserId){
+    if (result){
        throw new ForbiddenError("Você não tem permissão para eliminar este post")
     }
 

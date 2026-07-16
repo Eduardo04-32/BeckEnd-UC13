@@ -1,0 +1,150 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fundo da tela mais neutro para ajudar na concentração */
+body {
+    background-color: #f4f6f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+/* Container do editor de posts */
+.post-container {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 700px;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Cabeçalho */
+.post-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eef2f5;
+    padding-bottom: 1.5rem;
+}
+
+.post-header h2 {
+    font-size: 1.8rem;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+.post-header p {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+/* Grupos de Input */
+.input-group {
+    margin-bottom: 1.8rem;
+    position: relative;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+/* Estilização para Inputs, Selects e Textareas */
+.input-group input,
+.input-group select,
+.input-group textarea {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #2d3748;
+    outline: none;
+    background-color: #f8fafc;
+    transition: all 0.25s ease;
+}
+
+/* Estilização específica do Textarea para impedir que quebre o layout */
+.input-group textarea {
+    resize: vertical;
+    min-height: 150px;
+    line-height: 1.6;
+}
+
+/* Efeito de foco (fina borda azulada e fundo branco) */
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    border-color: #4f46e5;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Contador de caracteres discreto */
+.character-counter {
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    color: #a0aec0;
+    margin-top: 0.4rem;
+}
+
+/* Alinhamento dos botões no rodapé */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid #eef2f5;
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Estilo comum dos botões */
+button {
+    padding: 0.8rem 1.8rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Botão Secundário (Descartar) */
+.btn-secondary {
+    background-color: transparent;
+    color: #718096;
+    border: 1px solid #cbd5e0;
+}
+
+.btn-secondary:hover {
+    background-color: #f7fafc;
+    color: #4a5568;
+    border-color: #a0aec0;
+}
+
+/* Botão Primário (Publicar) */
+.btn-primary {
+    background-color: #4f46e5;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #4338ca;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+/* Efeito físico de clique para ambos */
+button:active {
+    transform: scale(0.97);
+}

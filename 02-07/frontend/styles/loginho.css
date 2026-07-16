@@ -1,0 +1,132 @@
+/* Reset básico de margens e fontes */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Centraliza o login na tela inteira com um fundo moderno */
+body {
+    background: linear-gradient(135deg, #6a8dff 0%, #c04c4c 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+}
+
+/* O "card" branco do login */
+.login-container {
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-container h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+    color: #1a1a1a;
+    text-align: center;
+}
+
+.login-container p {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Estilização dos campos de entrada */
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* Efeito azul/verde suave ao clicar nos campos */
+.input-group input:focus {
+    border-color: #74ebd5;
+    box-shadow: 0 0 0 3px rgba(116, 235, 213, 0.25);
+}
+
+/* Alinhamento do "Lembrar de mim" e "Esqueceu a senha" */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+
+.forgot-password {
+    color: #5c6bc0;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+    color: #3f51b5;
+}
+
+/* Botão de Envio */
+.btn-login {
+    width: 100%;
+    padding: 0.85rem;
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.btn-login:hover {
+    background-color: #3f51b5;
+}
+
+/* Efeito de clique físico no botão */
+.btn-login:active {
+    transform: scale(0.98);
+}
+
+/* Link de cadastro inferior */
+.register-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.register-link a {
+    color: #5c6bc0;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
