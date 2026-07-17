@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Usuário - Gerenciar Postagens</title>
+    <link rel="stylesheet" href="/02-07/frontend/styles/Post.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Menu Lateral de Opções (Aparece pós-login) -->
+        <aside class="sidebar">
+            <div class="user-info">
+                <h3>Olá, Usuário!</h3>
+                <p>Gerencie seus assuntos</p>
+            </div>
+            <nav class="menu-nav">
+                <button class="menu-btn active" data-target="criar">Criar Postagem</button>
+                <button class="menu-btn" data-target="listar">Minhas Postagens</button>
+                <button class="menu-btn" data-target="atualizar">Atualizar Postagem</button>
+                <button class="menu-btn danger" data-target="eliminar">Eliminar Postagem</button>
+            </nav>
+        </aside>
+
+        <!-- Área de Conteúdo Dinâmico -->
+        <main class="content-area">
+
+            <!-- TAB 1: CRIAR POSTAGEM (O padrão que você já tinha) -->
+            <section id="tab-criar" class="post-card active">
+                <header class="post-header">
+                    <h2>Criar Nova Postagem</h2>
+                    <p>Insira o assunto principal do seu conteúdo</p>
+                </header>
+                <form class="post-form">
+                    <div class="input-group">
+                        <label for="post-title">Título do Assunto</label>
+                        <input type="text" id="post-title" placeholder="Digite o título do assunto aqui..." required>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Publicar Assunto</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- TAB 2: SOLICITAR / LISTAR POSTS DO USUÁRIO -->
+            <section id="tab-listar" class="post-card">
+                <header class="post-header">
+                    <h2>Minhas Postagens</h2>
+                    <p>Veja todos os assuntos cadastrados por você</p>
+                </header>
+                <div class="posts-list">
+                    <!-- Exemplo de como os posts solicitados vão aparecer -->
+                    <div class="post-item">
+                        <span class="post-item-title">Exemplo de Assunto #1</span>
+                        <span class="post-date">Postado em: 15/07/2026</span>
+                    </div>
+                    <div class="post-item">
+                        <span class="post-item-title">Exemplo de Assunto #2</span>
+                        <span class="post-date">Postado em: 10/07/2026</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: ATUALIZAR POSTAGEM -->
+            <section id="tab-atualizar" class="post-card">
+                <header class="post-header">
+                    <h2>Atualizar Postagem</h2>
+                    <p>Modifique um assunto existente</p>
+                </header>
+                <form class="post-form">
+                    <div class="input-group">
+                        <label for="select-update">Selecione o Post</label>
+                        <select id="select-update" required>
+                            <option value="">Escolha qual assunto deseja alterar...</option>
+                            <option value="1">Exemplo de Assunto #1</option>
+                            <option value="2">Exemplo de Assunto #2</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="update-title">Novo Título do Assunto</label>
+                        <input type="text" id="update-title" placeholder="Digite o novo título..." required>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- TAB 4: ELIMINAR POSTAGEM -->
+            <section id="tab-eliminar" class="post-card">
+                <header class="post-header">
+                    <h2>Eliminar Postagem</h2>
+                    <p class="warning-text">Atenção: Esta ação não pode ser desfeita!</p>
+                </header>
+                <form class="post-form">
+                    <div class="input-group">
+                        <label for="select-delete">Selecione o Post para Excluir</label>
+                        <select id="select-delete" required>
+                            <option value="">Escolha o assunto que será deletado...</option>
+                            <option value="1">Exemplo de Assunto #1</option>
+                            <option value="2">Exemplo de Assunto #2</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn-danger">Excluir Permanentemente</button>
+                    </div>
+                </form>
+            </section>
+
+        </main>
+    </div>
+
+</body>
+</html>

@@ -8,7 +8,10 @@
 
 /* Centraliza o login na tela inteira com um fundo moderno */
 body {
-    background: linear-gradient(135deg, #6a8dff 0%, #c04c4c 100%);
+    background-image: url("https://i.pinimg.com/1200x/16/6b/61/166b61c94030b02020cf2b8057845257.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -18,24 +21,26 @@ body {
 
 /* O "card" branco do login */
 .login-container {
-    background-color: #ffffff;
+    background-color: #ffffff00;
     padding: 2.5rem;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     width: 100%;
     max-width: 400px;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 15px #ffffff;
 }
 
 .login-container h2 {
     margin-bottom: 0.5rem;
     font-size: 1.8rem;
-    color: #1a1a1a;
+    color: #ece8e8;
     text-align: center;
 }
 
 .login-container p {
     font-size: 0.9rem;
-    color: #666;
+    color: #e8e8e8;
     text-align: center;
     margin-bottom: 2rem;
 }
@@ -50,7 +55,7 @@ body {
     margin-bottom: 0.5rem;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #555;
+    color: #ececec;
 }
 
 .input-group input {
@@ -65,7 +70,7 @@ body {
 
 /* Efeito azul/verde suave ao clicar nos campos */
 .input-group input:focus {
-    border-color: #74ebd5;
+    border-color: #fbfffe;
     box-shadow: 0 0 0 3px rgba(116, 235, 213, 0.25);
 }
 
@@ -80,14 +85,14 @@ body {
 
 
 .forgot-password {
-    color: #5c6bc0;
+    color: hsl(230, 75%, 98%);
     text-decoration: none;
     transition: color 0.2s;
 }
 
 .forgot-password:hover {
     text-decoration: underline;
-    color: #3f51b5;
+    color: #070d2a;
 }
 
 /* Botão de Envio */
@@ -105,7 +110,7 @@ body {
 }
 
 .btn-login:hover {
-    background-color: #3f51b5;
+    background-color: #3014ad77;
 }
 
 /* Efeito de clique físico no botão */
@@ -118,11 +123,11 @@ body {
     text-align: center;
     margin-top: 1.5rem;
     font-size: 0.85rem;
-    color: #666;
+    color: #979797;
 }
 
 .register-link a {
-    color: #5c6bc0;
+    color: #e8eaf8;
     text-decoration: none;
     font-weight: 600;
 }

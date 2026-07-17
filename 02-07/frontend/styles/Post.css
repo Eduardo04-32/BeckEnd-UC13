@@ -1,0 +1,240 @@
+/* Configurações Globais e Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f6f9;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-image: url("https://i.pinimg.com/736x/8c/94/50/8c94500abd9e77c1aa65b9e15393e901.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Layout do Painel */
+.dashboard-container {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    min-height: 550px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 35px #0330a2;
+
+}
+
+/* Menu Lateral (Sidebar) */
+.sidebar {
+    width: 250px;
+    background-color: #3b6bb934;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.user-info h3 {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+}
+
+.user-info p {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.menu-btn:hover {
+    background-color: #334155;
+    color: #ffffff;
+}
+
+.menu-btn.active {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+.menu-btn.danger:hover {
+    background-color: #d6464693;
+    color: #ffffff;
+}
+
+/* Área de Conteúdo */
+.content-area {
+    flex: 1;
+    padding: 40px;
+    background-color: #ffffff17;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Esconder seções inativas por padrão */
+.post-card {
+    display: none;
+}
+
+/* Mostrar apenas a seção que estiver ativa */
+.post-card.active {
+    display: block;
+}
+
+/* Cabeçalho dos Cards */
+.post-header {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eef2f5;
+    padding-bottom: 15px;
+}
+
+.post-header h2 {
+    color: #f8fafd;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.post-header p {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.post-header .warning-text {
+    color: #ef4444;
+    font-weight: 500;
+}
+
+/* Formulários e Inputs (Campos de Seleção/Texto) */
+.post-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    color: #334155;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1rem;
+    color: #0f172a;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    background-color: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Estilização da Lista de Posts (Solicitações) */
+.posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.post-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.post-item-title {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.post-date {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+/* Botões */
+.button-group {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.btn-primary {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
