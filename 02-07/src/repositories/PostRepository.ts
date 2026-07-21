@@ -12,9 +12,12 @@ export const PostRepository = {
     },
 
     //encontra um post atraves de um id
-    async findById(id: number){
-        return repo.findOne({where: {id}, relations: ["user"] })
-    },
+    async findById(id: number) {
+    return repo.findOne({
+        where: { id },
+        relations: ["user"]
+    });
+},
 
     // este metodo encontra todos os post de um usuario especifo
     async findByUserId(userId:number){

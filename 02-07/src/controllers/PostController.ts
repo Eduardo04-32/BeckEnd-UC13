@@ -61,7 +61,7 @@ export class PostController {
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const id = Number(req.params.id);
-      await PostServices.delete(id);
+      await PostServices.delete(id, (req as any).user.id);
       const loggedUser = (req as any).user;
       return res.status(204).send();
     } catch (error) {
