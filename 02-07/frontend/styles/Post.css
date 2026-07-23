@@ -22,8 +22,8 @@ body {
 /* Layout do Painel */
 .dashboard-container {
     display: flex;
-    width: 100%;
-    max-width: 900px;
+    width: 70vw;
+    height: 80vh;
     min-height: 550px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
